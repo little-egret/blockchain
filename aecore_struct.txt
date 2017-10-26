@@ -1,0 +1,142 @@
+Application: Aecore
+"""
+区块链核心
+"""
+
+	Sup: Keys.Worker.Supervisor
+	Worker: Keys.Worker
+	"""
+	管理AE节点的秘钥
+	"""
+
+		"""
+		获取接收者的公钥，生成交易信息的签名，合成签名过了的交易信息
+		"""
+		sign_tx(address(), amount()) :: {:ok, %SignedTx{}}
+
+		
+		"""
+		验证签名了的交易信息
+		"""
+		verify_tx(tx()) :: boolean()
+
+
+	Sup: Chain.Worker.Supervisor
+	Worker: Chain.Worker
+	"""
+	管理·链·的信息，链是区块的列表
+	"""
+
+		
+	Sup: Miner.Worker.Supervisor
+	Worker: Miner.Worker
+	"""
+	挖矿状态机
+
+	挖新区块：获取链的状态
+		   |> 获取交易信息
+		   |> 计算块难度
+		   |> 获取之前的区块以验证合法性
+		   |> 过滤不合法的交易信息
+		   |> 计算根哈希
+		   |> 更新链状态
+	"""
+
+
+	Sup: Txs.Pool.Worker.Supervisor
+	Worker: Pool.Worker
+	"""
+	交易池
+	用于存放交易信息
+	"""
+
+
+	Sup: Peers.Worker.Supervisor
+	Worker: Peers.Worker
+	"""
+	节点管理
+	客户端保存的创始区块的头哈希需要相同才可以加入节点列表
+	还可以通过GET请求来更新节点的区块哈希
+	"""
+	Worker: Peers.Scheduler
+	"""
+	周期性地执行节点检查
+	"""
+
+
+ToolModules:
+
+	Pow.Hashcash
+	"""
+	pow 结果验证，nonce 生成
+	"""
+
+
+StructDefs:
+
+	Structures.Block
+	"""
+	区块
+	"""
+
+	Structures.Header
+	"""
+	区块头
+	"""
+
+	Structures.SignedTx
+	"""
+	签名了的交易信息
+	"""
+
+	Structures.TxData
+	"""
+	交易内容
+	"""
+
+
+Utils:
+	
+	Bits
+	"""
+	将字符串转换成bit列表
+	"""
+
+	Serialization
+	"""
+	将区块用encode16进行编码与解码
+	"""
+
+	Blockchain.BlockValidation
+	"""
+	检查区块的合法性
+	区块非法的情形:
+		非创始区块，前区块哈希不对应；
+		非创始区块，高度不正确；
+		头哈希没有达到难度目标；
+		交易的根哈希不匹配头信息；
+		存在交易不合法；
+		coinbase交易超出限制；
+		链状态哈希不匹配；
+		链状态不合法；
+		区块版本非法
+	"""
+
+	Blockchain.Difficulty
+	"""
+	计算下个区块的难度
+	难度与上一个区块的难度以及距离（时间）有关
+	难度调整有最大限制
+	"""
+
+
+Application: Aehttpclient
+"""
+通过http请求模拟客户端节点
+"""
+
+
+Application: Aehttpserver
+"""
+phoenix 服务器
+"""	
